@@ -1,0 +1,57 @@
+name: lint
+
+# Shell scripts that ship inside the image are hard to test - they need Wine, a
+# desktop session and a real installer. Static analysis is the cheapest defence
+# we have, so it runs on every change.
+#
+# It has limits worth remembering: shellcheck validates syntax and common
+# mistakes, not whether a command's flags actually exist. `wineserver --wait`
+# passed shellcheck cleanly while doing nothing at all.
+
+on:
+  push:
+    paths:
+      - "files/system/usr/bin/**"
+      - ".github/workflows/lint.yml"
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  shellcheck:
+    name: Shell scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: Analyse shipped scripts
+        run: |
+          set -euo pipefail
+          found=0
+          for f in files/system/usr/bin/*; do
+            [ -f "$f" ] || continue
+            echo "==> $f"
+            shellcheck -S style "$f"
+            found=$((found + 1))
+          done
+          echo "checked $found script(s)"
+
+      - name: Verify scripts are executable
+        run: |
+          set -euo pipefail
+          fail=0
+          for f in files/system/usr/bin/*; do
+            [ -f "$f" ] || continue
+            if [ ! -x "$f" ]; then
+              # Authored on Windows, which has no permission bits. Without the
+              # bit the script ships inert and fails at runtime, not at build.
+              echo "::error file=$f::not executable - run: git update-index --chmod=+x $f"
+              fail=1
+            fi
+          done
+          exit $fail

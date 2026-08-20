@@ -42,6 +42,21 @@ slugify() {
     | sed -e 's/\.[^.]*$//' -e 's/[^a-z0-9]\+/-/g' -e 's/^-//' -e 's/-$//'
 }
 
+# A great many installers are simply called setup.exe. Naming an application
+# after that would be meaningless to the user and would make the second such
+# installer collide with the first. When the filename carries no information,
+# fall back to the containing directory, which is usually the product name.
+derive_id() {
+  local path="$1" id
+  id="$(slugify "$(basename "$path")")"
+  case "$id" in
+    setup|setup-x64|setup-x86|install|installer|update|updater|main|'')
+      id="$(slugify "$(basename "$(dirname "$path")")")"
+      ;;
+  esac
+  printf '%s' "$id"
+}
+
 cmd_install() {
   local installer="${1:-}"
   [[ -n "$installer" ]] || die "no installer given"
@@ -50,7 +65,7 @@ cmd_install() {
   installer="$(realpath "$installer")"
 
   local id app_dir
-  id="$(slugify "$(basename "$installer")")"
+  id="$(derive_id "$installer")"
   [[ -n "$id" ]] || die "could not derive a name from: $installer"
   app_dir="$APPS_DIR/$id"
   [[ -e "$app_dir" ]] && die "'$id' is already installed - uninstall it first"
@@ -82,8 +97,13 @@ cmd_install() {
     *)     wine "$installer"            || warn "the installer exited with an error" ;;
   esac
 
-  # The shortcut watcher runs slightly behind the installer process exiting.
-  wineserver --wait || true
+  # Wait for every Wine process to finish, winemenubuilder included - it writes
+  # the .desktop files we are about to look for, and it outlives the installer.
+  # The flag is -w; wineserver has no --wait, so the long form silently did
+  # nothing and the snapshot below could miss entries that arrived moments
+  # later. A short settle pause on top, because the write is not atomic.
+  wineserver -w || true
+  sleep 1
 
   find "$DESKTOP_DIR" -name '*.desktop' 2>/dev/null | sort >"$after"
   local new_entries=()
