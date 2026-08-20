@@ -21,27 +21,32 @@ modules:
   # ---------------------------------------------------------------------
   - type: dnf
     install:
-      # firmware updates - Dell has excellent LVFS coverage
-      - fwupd
-      # Dell SMBIOS: thermal profiles, battery charge limits, fan control
-      - libsmbios
-      # battery/suspend diagnosis - you will need this in week 2
-      - powertop
-      # Intel GPU power and frequency inspection
-      - intel-gpu-tools
-      # L2 - Windows compatibility. Not an emulator: Win32 calls are
-      # translated, CPU code runs natively on the same x86-64 silicon.
-      - wine
-      - winetricks
-      # Ship the .NET and HTML runtimes up front so installers never stop on
-      # a "Wine could not find Mono, download it?" dialog. Verify the exact
-      # package names on the first build - Fedora has renamed these before.
-      - wine-mono
-      - wine-gecko
-      # ivy-winapp needs these: desktop-file-edit to tag generated launchers,
-      # icoutils to pull icons out of executables that create no shortcut.
-      - desktop-file-utils
-      - icoutils
+      # A wrong package name would otherwise fail the entire build. Skipping
+      # keeps us moving, but it hides mistakes: after a green build, read the
+      # log for "skipped" lines and confirm every package below actually
+      # landed. Silent absence is how a feature quietly stops working.
+      skip-unavailable: true
+      packages:
+        # firmware updates - Dell has excellent LVFS coverage
+        - fwupd
+        # Dell SMBIOS: thermal profiles, battery charge limits, fan control
+        - libsmbios
+        # battery/suspend diagnosis - you will need this in week 2
+        - powertop
+        # Intel GPU power and frequency inspection
+        - intel-gpu-tools
+        # L2 - Windows compatibility. Not an emulator: Win32 calls are
+        # translated, CPU code runs natively on the same x86-64 silicon.
+        - wine
+        - winetricks
+        # .NET and HTML runtimes up front, so installers never stop on a
+        # "Wine could not find Mono, download it?" dialog.
+        - wine-mono
+        - wine-gecko
+        # ivy-winapp needs these: desktop-file-edit to tag generated launchers,
+        # icoutils to pull icons out of executables that create no shortcut.
+        - desktop-file-utils
+        - icoutils
 
   # ---------------------------------------------------------------------
   # L2 - WINDOWS APPS
@@ -49,12 +54,14 @@ modules:
   # Flatpak keeps it sandboxed and updating independently of the OS image.
   # ---------------------------------------------------------------------
   - type: default-flatpaks
-    notify: true
-    system:
-      repo-url: https://dl.flathub.org/repo/flathub.flatpakrepo
-      repo-name: flathub
-      install:
-        - com.usebottles.bottles
+    configurations:
+      # System scope, so the app is there for every user rather than being
+      # reinstalled per account. Flathub is the default repo when none is
+      # named, so we do not repeat it here.
+      - scope: system
+        notify: true
+        install:
+          - com.usebottles.bottles
 
   # ---------------------------------------------------------------------
   # Signs the image so installs can cryptographically verify updates.
