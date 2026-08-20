@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=Install Windows Application
+Comment=Set up a Windows program in its own isolated environment
+Exec=/usr/bin/nyx-winapp %f
+Icon=application-x-ms-dos-executable
+Terminal=true
+# Hidden from the menu: this is a file handler, not something you launch.
+NoDisplay=true
+MimeType=application/x-ms-dos-executable;application/x-msdownload;application/x-msi;application/vnd.microsoft.portable-executable;
+
+# Terminal=true is a v0 compromise - the installer's own window appears, but
+# progress and errors go to a terminal. v3 replaces this with a real UI.

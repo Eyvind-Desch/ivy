@@ -1,0 +1,63 @@
+---
+# Shared modules for every image variant. Both recipe.yml and
+# recipe-nvidia.yml pull this in, so anything that is not graphics-specific
+# belongs here and nowhere else.
+
+modules:
+  # ---------------------------------------------------------------------
+  # L1 - HARDWARE (Dell Inspiron 14 5440 "metari")
+  # Anything under files/system/ is copied onto the image root as-is.
+  # Config drops go here; imperative fixes go in files/scripts/.
+  # ---------------------------------------------------------------------
+  - type: files
+    files:
+      - source: system
+        destination: /
+
+  # ---------------------------------------------------------------------
+  # Baked-in packages. Part of the image, not layered at runtime, so they
+  # cost nothing at boot and can never half-fail during an update.
+  # Keep this list short - every entry is something you now maintain.
+  # ---------------------------------------------------------------------
+  - type: dnf
+    install:
+      # firmware updates - Dell has excellent LVFS coverage
+      - fwupd
+      # Dell SMBIOS: thermal profiles, battery charge limits, fan control
+      - libsmbios
+      # battery/suspend diagnosis - you will need this in week 2
+      - powertop
+      # Intel GPU power and frequency inspection
+      - intel-gpu-tools
+      # L2 - Windows compatibility. Not an emulator: Win32 calls are
+      # translated, CPU code runs natively on the same x86-64 silicon.
+      - wine
+      - winetricks
+      # Ship the .NET and HTML runtimes up front so installers never stop on
+      # a "Wine could not find Mono, download it?" dialog. Verify the exact
+      # package names on the first build - Fedora has renamed these before.
+      - wine-mono
+      - wine-gecko
+      # nyx-winapp needs these: desktop-file-edit to tag generated launchers,
+      # icoutils to pull icons out of executables that create no shortcut.
+      - desktop-file-utils
+      - icoutils
+
+  # ---------------------------------------------------------------------
+  # L2 - WINDOWS APPS
+  # Bottles manages Wine prefixes (one isolated "fake C: drive" per app).
+  # Flatpak keeps it sandboxed and updating independently of the OS image.
+  # ---------------------------------------------------------------------
+  - type: default-flatpaks
+    notify: true
+    system:
+      repo-url: https://dl.flathub.org/repo/flathub.flatpakrepo
+      repo-name: flathub
+      install:
+        - com.usebottles.bottles
+
+  # ---------------------------------------------------------------------
+  # Signs the image so installs can cryptographically verify updates.
+  # Requires the cosign key pair - see docs/decisions/0001-foundation.md.
+  # ---------------------------------------------------------------------
+  - type: signing

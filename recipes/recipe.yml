@@ -1,0 +1,30 @@
+---
+# yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
+
+# DEFAULT IMAGE - Intel graphics only, Nvidia dGPU left powered down.
+#
+# This is the daily driver. The Inspiron 14 5440's MX570 A has 2 GB of VRAM
+# and is a battery liability for our workload (Windows apps, dev, UI work -
+# no gaming). Shipping without the Nvidia stack means: better idle power,
+# no Secure Boot key enrollment, no driver/kernel version coupling.
+#
+# If you need the dGPU, build recipe-nvidia.yml instead and rebase onto it.
+# See docs/decisions/0002-graphics.md.
+#
+# `name` becomes the published image: ghcr.io/<your-github-user>/<name>
+# Pick the real product name before the first push - renaming later means
+# every existing installation has to be rebased by hand.
+version: 1
+name: nyx
+description: A modern, fast, Dell-tuned Linux desktop with first-class Windows app support.
+
+# L0 - BASE
+# Aurora DX = Fedora Atomic + KDE Plasma 6 + developer tooling, already
+# built, tested and signed upstream. We inherit it instead of maintaining it.
+# `stable` tracks the current Fedora release; pin to a number to freeze
+# major-version upgrades.
+base-image: ghcr.io/ublue-os/aurora-dx
+image-version: stable
+
+modules:
+  - from-file: common.yml

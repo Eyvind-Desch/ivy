@@ -1,0 +1,39 @@
+name: build-os
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["**.md", "docs/**", "design/**"]
+  pull_request:
+  # Rebuild nightly so upstream Fedora/Aurora security fixes reach users
+  # even on days you do not touch the recipe.
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.recipe }}
+    runs-on: ubuntu-latest
+    strategy:
+      # One variant failing must not hide the result of the other.
+      fail-fast: false
+      matrix:
+        recipe:
+          - recipe.yml         # default: Intel graphics only
+          - recipe-nvidia.yml  # variant: MX570 dGPU stack
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        uses: blue-build/github-action@main
+        with:
+          recipe: recipes/${{ matrix.recipe }}
+          cosign_private_key: ${{ secrets.SIGNING_SECRET }}
+          registry_token: ${{ github.token }}
+          pr_event_number: ${{ github.event.number }}

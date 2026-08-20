@@ -1,0 +1,15 @@
+# Never commit the private signing key - it is the identity of your OS.
+cosign.key
+*.pem
+
+# Build output
+*.iso
+*.qcow2
+*.raw
+/output/
+
+# Editor / OS noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

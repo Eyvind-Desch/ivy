@@ -1,0 +1,15 @@
+# This repo is authored on Windows and executed on Linux.
+#
+# Without this, Git checks files out with CRLF line endings and a single
+# trailing \r turns "#!/usr/bin/env bash" into "bad interpreter: no such file
+# or directory" at runtime - with the script looking completely correct in
+# every editor. Force LF everywhere; nothing here is consumed by a Windows
+# program that needs CRLF.
+* text=auto eol=lf
+
+# Binary assets must never be line-ending converted.
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff2 binary
+*.iso binary

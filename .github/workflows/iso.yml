@@ -1,0 +1,37 @@
+name: build-iso
+
+# Manual only. ISOs are ~3 GB and cannot be attached to GitHub releases for
+# free, so this uploads a workflow artifact you download and flash.
+# Day-to-day you do NOT need this: existing installs update themselves
+# straight from the container image. An ISO is only for installing on a new
+# machine.
+on:
+  workflow_dispatch:
+    inputs:
+      image-tag:
+        description: Image tag to turn into an ISO
+        default: latest
+        required: true
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  iso:
+    name: Build live ISO
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build ISO
+        uses: ublue-os/titanoboa@main
+        with:
+          image-ref: ghcr.io/${{ github.repository_owner }}/nyx:${{ inputs.image-tag }}
+
+      - name: Upload ISO
+        uses: actions/upload-artifact@v4
+        with:
+          name: nyx-${{ inputs.image-tag }}-iso
+          path: ./output.iso
+          retention-days: 7

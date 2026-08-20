@@ -1,0 +1,17 @@
+# Make double-clicking a Windows executable Just Work.
+#
+# Without this, Dolphin offers to "run in terminal" or opens an archive tool.
+# This is a one-line change that removes the single most confusing moment a
+# Windows user has on their first day.
+
+[Default Applications]
+application/x-ms-dos-executable=nyx-winapp.desktop
+application/x-msdownload=nyx-winapp.desktop
+application/x-msi=nyx-winapp.desktop
+application/vnd.microsoft.portable-executable=nyx-winapp.desktop
+
+[Added Associations]
+application/x-ms-dos-executable=nyx-winapp.desktop;
+application/x-msdownload=nyx-winapp.desktop;
+application/x-msi=nyx-winapp.desktop;
+application/vnd.microsoft.portable-executable=nyx-winapp.desktop;

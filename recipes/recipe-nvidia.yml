@@ -1,0 +1,30 @@
+---
+# yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
+
+# NVIDIA VARIANT - includes the MX570 A driver stack.
+#
+# Build this to measure the real battery cost of the dGPU against the default
+# image. Rebasing between the two takes one command and a reboot, which is the
+# entire point of having both.
+#
+# The MX570 A is GA107 (Ampere), so the *open* kernel modules are supported.
+# Older MX cards (MX350 and earlier, Pascal) are NOT - if you ever test this
+# recipe on different hardware, check the generation first.
+#
+# Extra cost of this image, be aware before choosing it:
+#   - Secure Boot: the Nvidia kernel modules are signed with Universal Blue's
+#     key, which must be enrolled via mokutil, or Secure Boot turned off.
+#   - Suspend: needs Nvidia's VRAM-preservation services to resume reliably.
+#     Aurora's Nvidia images set this up, but verify it on the baseline test.
+#   - Idle drain: the dGPU must reach D3cold when unused. Ampere enables
+#     dynamic power management automatically, but regressions are common -
+#     measure, do not assume.
+version: 1
+name: nyx-nvidia
+description: nyx with Nvidia MX570 support - for measuring the dGPU's battery cost.
+
+base-image: ghcr.io/ublue-os/aurora-dx-nvidia-open
+image-version: stable
+
+modules:
+  - from-file: common.yml
