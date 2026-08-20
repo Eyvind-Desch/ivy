@@ -39,10 +39,19 @@ modules:
         # translated, CPU code runs natively on the same x86-64 silicon.
         - wine
         - winetricks
-        # .NET and HTML runtimes up front, so installers never stop on a
+        # .NET runtime up front, so installers never stop on a
         # "Wine could not find Mono, download it?" dialog.
         - wine-mono
-        - wine-gecko
+        # NOTE: there is deliberately no wine-gecko here. Fedora ships no such
+        # package - only mingw32/64-wine-gecko, which are cross-compiled
+        # libraries rather than the MSI that Wine looks for. Confirmed by the
+        # first green build: "No match for argument: wine-gecko".
+        #
+        # Consequence: an app needing an embedded HTML control may show Wine's
+        # "download Gecko?" dialog - exactly the jargon 0003 bans. The fix
+        # belongs in ivy-winapp, installing Gecko into the individual prefix
+        # on demand, which suits one-prefix-per-app better than a system-wide
+        # package would. Tracked as an ivy-winapp v2 task.
         # ivy-winapp needs these: desktop-file-edit to tag generated launchers,
         # icoutils to pull icons out of executables that create no shortcut.
         - desktop-file-utils
