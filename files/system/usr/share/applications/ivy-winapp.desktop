@@ -2,7 +2,7 @@
 Type=Application
 Name=Install Windows Application
 Comment=Set up a Windows program in its own isolated environment
-Exec=/usr/bin/nyx-winapp %f
+Exec=/usr/bin/ivy-winapp %f
 Icon=application-x-ms-dos-executable
 Terminal=true
 # Hidden from the menu: this is a file handler, not something you launch.

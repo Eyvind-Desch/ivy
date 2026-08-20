@@ -100,7 +100,7 @@ convenience delay ordering the enclosure.
 
 - Two environments to keep in sync. Acceptable: both consume the same published
   image, so there is no separate "dev build" to drift.
-- L2 work (`nyx-winapp`) can be developed almost entirely in the VM - Wine does
+- L2 work (`ivy-winapp`) can be developed almost entirely in the VM - Wine does
   not need a GPU for productivity software. Good news for progress this week.
 - The L2 v4 Windows-VM fallback needs nested virtualisation and will not be
   developed inside the VM. That is a real-hardware task, later.

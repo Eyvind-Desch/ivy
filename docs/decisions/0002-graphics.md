@@ -20,7 +20,7 @@ all, so this is a decision we cannot avoid making.
 ## Decision
 
 The default image is **Intel-only**. The Nvidia stack ships as a separate
-variant (`recipe-nvidia.yml` -> `nyx-nvidia`), built by the same CI run.
+variant (`recipe-nvidia.yml` -> `ivy-nvidia`), built by the same CI run.
 
 ## Why
 
@@ -48,7 +48,7 @@ and the architecture makes measuring it nearly free. Both images build from
 one push. Switching between them is one command and a reboot:
 
 ```sh
-sudo bootc switch ghcr.io/<user>/nyx-nvidia:latest && systemctl reboot
+sudo bootc switch ghcr.io/<user>/ivy-nvidia:latest && systemctl reboot
 ```
 
 Run the battery baseline on each, compare real numbers, and this decision

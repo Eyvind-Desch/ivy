@@ -20,8 +20,8 @@
 #     dynamic power management automatically, but regressions are common -
 #     measure, do not assume.
 version: 1
-name: nyx-nvidia
-description: nyx with Nvidia MX570 support - for measuring the dGPU's battery cost.
+name: ivy-nvidia
+description: ivy with Nvidia MX570 support - for measuring the dGPU's battery cost.
 
 base-image: ghcr.io/ublue-os/aurora-dx-nvidia-open
 image-version: stable

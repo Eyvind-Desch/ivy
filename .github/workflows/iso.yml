@@ -27,11 +27,11 @@ jobs:
       - name: Build ISO
         uses: ublue-os/titanoboa@main
         with:
-          image-ref: ghcr.io/${{ github.repository_owner }}/nyx:${{ inputs.image-tag }}
+          image-ref: ghcr.io/${{ github.repository_owner }}/ivy:${{ inputs.image-tag }}
 
       - name: Upload ISO
         uses: actions/upload-artifact@v4
         with:
-          name: nyx-${{ inputs.image-tag }}-iso
+          name: ivy-${{ inputs.image-tag }}-iso
           path: ./output.iso
           retention-days: 7

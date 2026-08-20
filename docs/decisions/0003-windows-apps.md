@@ -27,7 +27,7 @@ compatibility layer, which we would lose at.
 ### 1. One app, one prefix. Always.
 
 Each installed Windows app gets its own isolated prefix under
-`~/.local/share/nyx/apps/<id>/`. Never a shared prefix.
+`~/.local/share/ivy/apps/<id>/`. Never a shared prefix.
 
 Shared prefixes are how every Wine setup eventually dies: one installer drops a
 broken runtime and unrelated apps start failing weeks later, with no way to
@@ -97,7 +97,7 @@ Each stage is independently useful. Do not attempt them at once.
 | **v3** | Kirigami GUI: progress, app list, uninstall | it is usable by someone who is not you |
 | **v4** | Seamless Windows VM fallback | the 10% Wine cannot reach |
 
-v0 is in `files/system/usr/bin/nyx-winapp` - **written but never executed.**
+v0 is in `files/system/usr/bin/ivy-winapp` - **written but never executed.**
 Treat it as a specification you debug, not working code.
 
 ## Implementation notes

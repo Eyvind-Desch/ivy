@@ -1,4 +1,4 @@
-# nyx
+# ivy
 
 > Working name. Pick the real one before the first push - it becomes the image
 > URL and renaming later means rebasing every installation by hand.
@@ -33,8 +33,8 @@ so features are written once.
 
 | Image | Graphics | Use |
 |---|---|---|
-| `nyx` | Intel only, dGPU absent | **default** - best battery, no Secure Boot or driver coupling |
-| `nyx-nvidia` | + Nvidia MX570 open drivers | for measuring what the dGPU actually costs |
+| `ivy` | Intel only, dGPU absent | **default** - best battery, no Secure Boot or driver coupling |
+| `ivy-nvidia` | + Nvidia MX570 open drivers | for measuring what the dGPU actually costs |
 
 Switching between them is one command and a reboot. That is deliberate: the
 dGPU tradeoff should be settled by measured battery numbers, not by argument.
@@ -74,7 +74,7 @@ drain in sleep and audio are the usual Dell offenders. This is what makes it
 get a real installer window, get a real app in the menu with its real icon that
 uninstalls cleanly. No terminal, no prefix management, no "which Wine version".
 Design in [`docs/decisions/0003-windows-apps.md`](docs/decisions/0003-windows-apps.md);
-v0 is `files/system/usr/bin/nyx-winapp` - written, never run, debug it first.
+v0 is `files/system/usr/bin/ivy-winapp` - written, never run, debug it first.
 
 **Month 3+ - L3.** Design tokens first - type scale, spacing, color, motion -
 then implement as a Plasma theme. Design decisions before CSS.
@@ -96,7 +96,7 @@ This is the step that separates a real OS from a nice screenshot.
 4. **Install on the Dell** - follow
    [`docs/hardware/install-plan.md`](docs/hardware/install-plan.md), then:
    ```sh
-   sudo bootc switch --enforce-container-sigpolicy ghcr.io/<your-user>/nyx:latest
+   sudo bootc switch --enforce-container-sigpolicy ghcr.io/<your-user>/ivy:latest
    systemctl reboot
    ```
 5. **ISO** (only when installing on a fresh machine): run the `build-iso`
@@ -122,7 +122,7 @@ still record the bit - set it explicitly for every script you add under
 `files/system/usr/bin/`:
 
 ```sh
-git update-index --chmod=+x files/system/usr/bin/nyx-winapp
+git update-index --chmod=+x files/system/usr/bin/ivy-winapp
 ```
 
 This will bite you at least once. When something "installed fine but does

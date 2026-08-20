@@ -38,7 +38,7 @@ modules:
       # package names on the first build - Fedora has renamed these before.
       - wine-mono
       - wine-gecko
-      # nyx-winapp needs these: desktop-file-edit to tag generated launchers,
+      # ivy-winapp needs these: desktop-file-edit to tag generated launchers,
       # icoutils to pull icons out of executables that create no shortcut.
       - desktop-file-utils
       - icoutils

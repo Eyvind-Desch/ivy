@@ -153,11 +153,11 @@ control group for the baseline), then rebase onto your own image:
 # -> install from the Aurora ISO: https://getaurora.dev
 
 # then, once CI has published your image
-sudo bootc switch --enforce-container-sigpolicy ghcr.io/<user>/nyx:latest
+sudo bootc switch --enforce-container-sigpolicy ghcr.io/<user>/ivy:latest
 systemctl reboot
 
 # to compare the Nvidia variant
-sudo bootc switch --enforce-container-sigpolicy ghcr.io/<user>/nyx-nvidia:latest
+sudo bootc switch --enforce-container-sigpolicy ghcr.io/<user>/ivy-nvidia:latest
 systemctl reboot
 ```
 

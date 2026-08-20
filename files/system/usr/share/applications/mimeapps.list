@@ -5,13 +5,13 @@
 # Windows user has on their first day.
 
 [Default Applications]
-application/x-ms-dos-executable=nyx-winapp.desktop
-application/x-msdownload=nyx-winapp.desktop
-application/x-msi=nyx-winapp.desktop
-application/vnd.microsoft.portable-executable=nyx-winapp.desktop
+application/x-ms-dos-executable=ivy-winapp.desktop
+application/x-msdownload=ivy-winapp.desktop
+application/x-msi=ivy-winapp.desktop
+application/vnd.microsoft.portable-executable=ivy-winapp.desktop
 
 [Added Associations]
-application/x-ms-dos-executable=nyx-winapp.desktop;
-application/x-msdownload=nyx-winapp.desktop;
-application/x-msi=nyx-winapp.desktop;
-application/vnd.microsoft.portable-executable=nyx-winapp.desktop;
+application/x-ms-dos-executable=ivy-winapp.desktop;
+application/x-msdownload=ivy-winapp.desktop;
+application/x-msi=ivy-winapp.desktop;
+application/vnd.microsoft.portable-executable=ivy-winapp.desktop;

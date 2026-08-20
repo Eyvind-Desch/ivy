@@ -9,7 +9,7 @@ installed system:
 
 ```
 files/system/etc/modprobe.d/dell-audio.conf   ->   /etc/modprobe.d/dell-audio.conf
-files/system/usr/share/wallpapers/nyx/        ->   /usr/share/wallpapers/nyx/
+files/system/usr/share/wallpapers/ivy/        ->   /usr/share/wallpapers/ivy/
 ```
 
 Use this for anything declarative: kernel module options, udev rules, systemd
