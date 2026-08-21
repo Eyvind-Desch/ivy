@@ -42,6 +42,21 @@ slugify() {
     | sed -e 's/\.[^.]*$//' -e 's/[^a-z0-9]\+/-/g' -e 's/^-//' -e 's/-$//'
 }
 
+# winemenubuilder writes two very different kinds of file into the same
+# directory, and only one of them is ours to claim:
+#
+#   wine/Programs/...        real Start Menu shortcuts - the app the user just
+#                            installed, with its icon already extracted
+#   wine-extension-*.desktop MIME handlers for .chm, .vbs, .hlp and friends
+#
+# Adopting the second kind is not merely untidy. Those files are shared by
+# every prefix on the system, so recording them in one app's manifest means
+# uninstalling that app would tear down file associations belonging to a
+# different one - the exact cross-contamination that one-prefix-per-app exists
+# to prevent. Observed on the first real run: a 7-Zip install claimed seven
+# entries, five of which were shared handlers.
+adopt_filter() { grep '/wine/Programs/' || true; }
+
 # A great many installers are simply called setup.exe. Naming an application
 # after that would be meaningless to the user and would make the second such
 # installer collide with the first. When the filename carries no information,
@@ -107,7 +122,7 @@ cmd_install() {
 
   find "$DESKTOP_DIR" -name '*.desktop' 2>/dev/null | sort >"$after"
   local new_entries=()
-  mapfile -t new_entries < <(comm -13 "$before" "$after")
+  mapfile -t new_entries < <(comm -13 "$before" "$after" | adopt_filter)
 
   local entry
   for entry in "${new_entries[@]}"; do
