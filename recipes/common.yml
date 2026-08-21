@@ -73,6 +73,19 @@ modules:
           - com.usebottles.bottles
 
   # ---------------------------------------------------------------------
+  # L3 - IDENTITY
+  # Display names only. ID deliberately stays `fedora`: changing it breaks
+  # COPR package identification, and nothing about calling ourselves a
+  # different distribution is worth that. See docs/decisions/0005.
+  # ---------------------------------------------------------------------
+  - type: os-release
+    properties:
+      NAME: ivy
+      PRETTY_NAME: ivy
+      VARIANT: Desktop
+      HOME_URL: https://github.com/Eyvind-Desch/ivy
+
+  # ---------------------------------------------------------------------
   # Signs the image so installs can cryptographically verify updates.
   # Requires the cosign key pair - see docs/decisions/0001-foundation.md.
   # ---------------------------------------------------------------------

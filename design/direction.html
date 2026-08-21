@@ -1,0 +1,724 @@
+<title>ivy Design Direction</title>
+<style>
+  :root {
+    --ground:   #F6F8F6;
+    --surface:  #FFFFFF;
+    --raised:   #EEF1EE;
+    --ink:      #141815;
+    --ink-soft: #5C665F;
+    --line:     #DDE3DE;
+    --accent:   #26714F;
+    --accent-soft: #E4F0E9;
+
+    /* The desktop mockup keeps its own palette in both page themes - it is a
+       depiction of the product, not part of this page's chrome. */
+    --os-ground:  #10130F;
+    --os-surface: #1B211C;
+    --os-raised:  #262E27;
+    --os-ink:     #E9EEE9;
+    --os-ink-soft:#97A399;
+    --os-line:    #333C35;
+    --os-accent:  #4FAE7F;
+
+    --font-ui: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --font-display: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+    --font-mono: "Cascadia Code", "Cascadia Mono", Consolas, ui-monospace, monospace;
+
+    --r-sm: 4px;
+    --r-md: 8px;
+    --r-lg: 12px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:   #101310;
+      --surface:  #171B18;
+      --raised:   #1F241F;
+      --ink:      #E7ECE8;
+      --ink-soft: #98A49C;
+      --line:     #2B322D;
+      --accent:   #5FBB8C;
+      --accent-soft: #1B2B23;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground:   #101310;
+    --surface:  #171B18;
+    --raised:   #1F241F;
+    --ink:      #E7ECE8;
+    --ink-soft: #98A49C;
+    --line:     #2B322D;
+    --accent:   #5FBB8C;
+    --accent-soft: #1B2B23;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font-ui);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 64px 24px 96px;
+    display: flex;
+    flex-direction: column;
+    gap: 72px;
+  }
+
+  /* ---------- masthead ---------- */
+
+  .masthead { display: flex; flex-direction: column; gap: 20px; }
+
+  .eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 600;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(38px, 6vw, 60px);
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    font-weight: 650;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .thesis {
+    max-width: 62ch;
+    font-size: 19px;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+
+  .thesis strong { color: var(--ink); font-weight: 600; }
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: 26px;
+    letter-spacing: -0.015em;
+    font-weight: 640;
+    margin: 0 0 4px;
+    text-wrap: balance;
+  }
+
+  h3 {
+    font-size: 15px;
+    font-weight: 650;
+    margin: 0 0 8px;
+    letter-spacing: -0.005em;
+  }
+
+  section { display: flex; flex-direction: column; gap: 24px; }
+
+  .lede { max-width: 68ch; color: var(--ink-soft); margin: 0; }
+
+  /* ---------- desktop mockup ---------- */
+
+  .screen {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    /* Grain first, so the gradient below stays smooth but the surface never
+       reads as flat vector fill. This is most of the difference between a
+       wallpaper that looks rendered and one that looks photographed. */
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E"),
+      radial-gradient(90% 70% at 18% 4%, #234634 0%, transparent 55%),
+      radial-gradient(80% 65% at 88% 92%, #12332F 0%, transparent 58%),
+      linear-gradient(163deg, #141A15 0%, #0B0E0B 100%);
+    border: 1px solid var(--line);
+    box-shadow:
+      0 2px 4px rgba(0,0,0,.12),
+      0 28px 64px -28px rgba(0,0,0,.55);
+    font-size: 13px;
+    color: var(--os-ink);
+  }
+
+  /* one application window */
+  .win {
+    position: absolute;
+    left: 8%; top: 10%;
+    width: 55%;
+    background: color-mix(in srgb, var(--os-surface) 88%, transparent);
+    backdrop-filter: blur(20px) saturate(130%);
+    border: 1px solid color-mix(in srgb, #fff 9%, transparent);
+    border-radius: var(--r-md);
+    /* Three layers, not one blur: a hairline contact shadow, a mid ambient,
+       and a wide soft cast. A single large shadow always reads as a sticker. */
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.055),
+      0 1px 2px rgba(0,0,0,.30),
+      0 10px 20px -8px rgba(0,0,0,.42),
+      0 30px 60px -22px rgba(0,0,0,.62);
+    overflow: hidden;
+  }
+
+  .titlebar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 6px 9px 14px;
+    border-bottom: 1px solid var(--os-line);
+  }
+
+  .titlebar .name { font-size: 12.5px; font-weight: 500; flex: 1; }
+
+  .wbtns { display: flex; }
+  .wbtn {
+    width: 34px; height: 26px;
+    display: grid; place-items: center;
+    color: var(--os-ink-soft);
+    border-radius: var(--r-sm);
+  }
+  .wbtn:last-child:hover { background: #C4392F; color: #fff; }
+
+  .wbody { display: flex; min-height: 168px; }
+
+  .sidebar {
+    width: 38%;
+    padding: 10px 8px;
+    border-right: 1px solid var(--os-line);
+    display: flex; flex-direction: column; gap: 2px;
+  }
+
+  .srow {
+    display: flex; align-items: center; gap: 9px;
+    padding: 6px 9px;
+    border-radius: var(--r-sm);
+    color: var(--os-ink-soft);
+    font-size: 12.5px;
+  }
+  .srow.on { background: var(--os-raised); color: var(--os-ink); }
+  .srow.on .dot { background: var(--os-accent); }
+
+  .dot { width: 3px; height: 14px; border-radius: 2px; background: transparent; margin-left: -6px; }
+
+  .content { flex: 1; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+
+  .badge {
+    align-self: flex-start;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: .04em;
+    padding: 3px 9px;
+    border-radius: 99px;
+    background: color-mix(in srgb, var(--os-accent) 18%, transparent);
+    color: var(--os-accent);
+  }
+
+  .bar { height: 8px; border-radius: 99px; background: var(--os-raised); }
+  .bar.w80 { width: 80%; } .bar.w62 { width: 62%; } .bar.w45 { width: 45%; }
+
+  .cta {
+    align-self: flex-start;
+    margin-top: 4px;
+    font-size: 12.5px; font-weight: 600;
+    padding: 7px 16px;
+    border-radius: var(--r-sm);
+    background: var(--os-accent);
+    color: #08150E;
+  }
+
+  /* start menu */
+  .startmenu {
+    position: absolute;
+    left: 50%; transform: translateX(-50%);
+    bottom: 15%;
+    width: 40%;
+    background: color-mix(in srgb, var(--os-surface) 80%, transparent);
+    backdrop-filter: blur(30px) saturate(150%);
+    border: 1px solid color-mix(in srgb, #fff 10%, transparent);
+    border-radius: var(--r-lg);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.07),
+      0 2px 4px rgba(0,0,0,.3),
+      0 32px 64px -20px rgba(0,0,0,.7);
+    padding: 16px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+
+  .search {
+    display: flex; align-items: center; gap: 9px;
+    padding: 8px 12px;
+    border-radius: var(--r-sm);
+    background: var(--os-raised);
+    color: var(--os-ink-soft);
+    font-size: 12.5px;
+  }
+
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+
+  .app {
+    display: flex; flex-direction: column; align-items: center; gap: 7px;
+    padding: 11px 4px;
+    border-radius: var(--r-sm);
+    font-size: 10.5px;
+    color: var(--os-ink-soft);
+    text-align: center;
+  }
+  .app.on { background: var(--os-raised); color: var(--os-ink); }
+  .app .glyph { color: var(--os-ink); }
+
+  /* Floating dock. Detached from the edge so the wallpaper reads underneath
+     and the panel never eats a full strip of a 14-inch screen. */
+  .glass {
+    background: color-mix(in srgb, var(--os-surface) 74%, transparent);
+    backdrop-filter: blur(30px) saturate(150%);
+    border: 1px solid color-mix(in srgb, #fff 9%, transparent);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.07),
+      0 1px 3px rgba(0,0,0,.28),
+      0 16px 36px -12px rgba(0,0,0,.6);
+  }
+
+  .dock {
+    position: absolute;
+    left: 50%; transform: translateX(-50%);
+    bottom: 3.2%;
+    display: flex; align-items: center; gap: 4px;
+    padding: 6px;
+    border-radius: 15px;
+  }
+
+  .tb {
+    width: 30px; height: 30px;
+    display: grid; place-items: center;
+    border-radius: 9px;
+    color: var(--os-ink-soft);
+    position: relative;
+  }
+  .tb.on { background: color-mix(in srgb, #fff 9%, transparent); color: var(--os-ink); }
+  .tb.on::after {
+    content: ""; position: absolute; bottom: -4px; left: 50%;
+    transform: translateX(-50%);
+    width: 4px; height: 4px; border-radius: 50%;
+    background: var(--os-accent);
+  }
+
+  .divider {
+    width: 1px; height: 20px; margin: 0 3px;
+    background: color-mix(in srgb, #fff 12%, transparent);
+  }
+
+  /* Clock and system state get their own tile rather than a second bar. */
+  .status {
+    position: absolute;
+    right: 2.4%; bottom: 3.2%;
+    display: flex; align-items: center; gap: 11px;
+    padding: 8px 13px;
+    border-radius: 13px;
+    color: var(--os-ink-soft);
+  }
+
+  .status .time {
+    font-size: 11.5px;
+    color: var(--os-ink);
+    font-weight: 550;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.15;
+  }
+  .status .date { font-size: 10px; line-height: 1.15; }
+  .status .icons { display: flex; gap: 8px; align-items: center; }
+
+  .caption {
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    margin: 0;
+    max-width: 68ch;
+  }
+
+  /* ---------- comparison ---------- */
+
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+  .pane {
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    background: var(--surface);
+  }
+
+  .pane-label {
+    display: flex; align-items: baseline; gap: 8px;
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--line);
+    font-size: 12px; font-weight: 650;
+  }
+  .pane-label span { font-weight: 400; color: var(--ink-soft); }
+
+  .pane-stage { padding: 22px; display: grid; place-items: center; }
+
+  /* the "before": Wine's default Win95 chrome */
+  .w95 {
+    width: 100%; max-width: 300px;
+    background: #C0C0C0;
+    border: 2px solid;
+    border-color: #FFF #808080 #808080 #FFF;
+    font-family: "MS Sans Serif", Tahoma, sans-serif;
+    font-size: 12px;
+    color: #000;
+  }
+  .w95-bar {
+    background: linear-gradient(90deg, #000080, #1084D0);
+    color: #fff; font-weight: 700;
+    padding: 3px 4px;
+    display: flex; justify-content: space-between;
+  }
+  .w95-bar b { font-weight: 700; }
+  .w95-body { padding: 16px 12px; display: flex; flex-direction: column; gap: 14px; }
+  .w95-btn {
+    align-self: center;
+    background: #C0C0C0;
+    border: 2px solid;
+    border-color: #FFF #808080 #808080 #FFF;
+    padding: 4px 20px;
+  }
+  .w95-x {
+    background: #C0C0C0; border: 1px solid #808080;
+    width: 16px; height: 14px; line-height: 12px; text-align: center;
+    color: #000; font-size: 10px;
+  }
+
+  /* the "after": same dialog, ivy chrome */
+  .ivywin {
+    width: 100%; max-width: 300px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    box-shadow: 0 12px 28px -12px rgba(0,0,0,.35);
+    overflow: hidden;
+    font-size: 12.5px;
+  }
+  .ivywin-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 9px 8px 9px 13px;
+    border-bottom: 1px solid var(--line);
+    font-weight: 550;
+  }
+  .ivywin-body { padding: 18px 16px; display: flex; flex-direction: column; gap: 15px; }
+  .ivywin-btn {
+    align-self: center;
+    background: var(--accent);
+    color: var(--surface);
+    border-radius: var(--r-sm);
+    padding: 6px 20px;
+    font-weight: 600;
+    font-size: 12px;
+  }
+
+  .muted-line { height: 7px; border-radius: 99px; background: var(--raised); }
+
+  /* ---------- tokens ---------- */
+
+  .swatches { display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); gap: 12px; }
+
+  .sw {
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    overflow: hidden;
+  }
+  .sw-chip { height: 56px; }
+  .sw-meta { padding: 9px 11px; display: flex; flex-direction: column; gap: 1px; }
+  .sw-meta b { font-size: 12.5px; font-weight: 600; }
+  .sw-meta code { font-family: var(--font-mono); font-size: 11px; color: var(--ink-soft); }
+
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r-md); }
+  th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 12px; text-transform: uppercase; letter-spacing: .07em; color: var(--ink-soft); font-weight: 650; }
+  tr:last-child td { border-bottom: none; }
+  td code, .lede code { font-family: var(--font-mono); font-size: 12.5px; background: var(--raised); padding: 1px 5px; border-radius: var(--r-sm); }
+
+  .scale-row { display: flex; align-items: baseline; gap: 16px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+  .scale-row:last-child { border-bottom: none; }
+  .scale-row .label { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-soft); width: 92px; flex: none; }
+
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+  .card {
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    padding: 18px 20px;
+    background: var(--surface);
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .card p { margin: 0; font-size: 14px; color: var(--ink-soft); }
+  .card ul { margin: 0; padding-left: 18px; font-size: 14px; color: var(--ink-soft); display: flex; flex-direction: column; gap: 5px; }
+
+  .note {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+    padding: 16px 20px;
+    border-radius: 0 var(--r-md) var(--r-md) 0;
+  }
+  .note p { margin: 0; font-size: 14.5px; }
+  .note p + p { margin-top: 9px; }
+
+  @media (max-width: 720px) {
+    .compare, .cols { grid-template-columns: 1fr; }
+    .startmenu { width: 62%; }
+    .win { width: 78%; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="eyebrow">Layer 3 &middot; Interface</div>
+    <h1>ivy Design Direction</h1>
+    <p class="thesis">
+      Windows 11's spatial logic, because that is what a switcher already knows how to
+      operate. <strong>Our own colour, our own restraint, and a trick Windows cannot
+      do:</strong> Windows applications inherit the desktop theme, dark mode included.
+    </p>
+  </header>
+
+  <!-- ============ THE MOCKUP ============ -->
+  <section>
+    <h2>The desktop</h2>
+    <p class="lede">
+      Centred taskbar, 8&nbsp;px window radius, one accent on a neutral ground, blur
+      confined to system chrome. Everything below is reachable with Plasma&nbsp;6
+      configuration &mdash; no compositor to write.
+    </p>
+
+    <div class="screen">
+
+      <div class="win">
+        <div class="titlebar">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h7l2 2h9v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></svg>
+          <div class="name">Files</div>
+          <div class="wbtns">
+            <div class="wbtn"><svg width="11" height="11" viewBox="0 0 12 12" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><line x1="2" y1="6" x2="10" y2="6"/></svg></div>
+            <div class="wbtn"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><rect x="2.5" y="2.5" width="7" height="7" rx="1"/></svg></div>
+            <div class="wbtn"><svg width="11" height="11" viewBox="0 0 12 12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="3" x2="9" y2="9"/><line x1="9" y1="3" x2="3" y2="9"/></svg></div>
+          </div>
+        </div>
+        <div class="wbody">
+          <div class="sidebar">
+            <div class="srow on"><span class="dot"></span>Home</div>
+            <div class="srow"><span class="dot"></span>Documents</div>
+            <div class="srow"><span class="dot"></span>Downloads</div>
+            <div class="srow"><span class="dot"></span>Pictures</div>
+            <div class="srow"><span class="dot"></span>Projects</div>
+          </div>
+          <div class="content">
+            <div class="badge">7 items</div>
+            <div class="bar w80"></div>
+            <div class="bar w62"></div>
+            <div class="bar w45"></div>
+            <div class="cta">Open</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="startmenu">
+        <div class="search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+          Search apps and files
+        </div>
+        <div class="grid">
+          <div class="app on"><span class="glyph"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h7l2 2h9v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></svg></span>Files</div>
+          <div class="app"><span class="glyph"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><line x1="3" y1="12" x2="21" y2="12"/></svg></span>Web</div>
+          <div class="app"><span class="glyph"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l3 3-3 3"/><line x1="12.5" y1="15" x2="17" y2="15"/></svg></span>Terminal</div>
+          <div class="app"><span class="glyph"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="7" rx="1.5"/><rect x="3" y="13" width="18" height="7" rx="1.5"/><line x1="10.5" y1="7.5" x2="13.5" y2="7.5"/><line x1="10.5" y1="16.5" x2="13.5" y2="16.5"/></svg></span>Archive</div>
+          <div class="app"><span class="glyph"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V6a2 2 0 0 1 2-2h9l5 5v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M15 4v5h5"/></svg></span>Writer</div>
+          <div class="app"><span class="glyph"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg></span>Mail</div>
+          <div class="app"><span class="glyph"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg></span>Settings</div>
+          <div class="app"><span class="glyph"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>All apps</div>
+        </div>
+      </div>
+
+      <div class="dock glass">
+        <div class="tb"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
+        <div class="tb"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg></div>
+        <div class="divider"></div>
+        <div class="tb on"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h7l2 2h9v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></svg></div>
+        <div class="tb"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><line x1="3" y1="12" x2="21" y2="12"/></svg></div>
+        <div class="tb"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l3 3-3 3"/><line x1="12.5" y1="15" x2="17" y2="15"/></svg></div>
+        <div class="tb"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg></div>
+      </div>
+
+      <div class="status glass">
+        <div class="icons">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5a10 10 0 0 1 14 0"/><path d="M8.5 16a5.5 5.5 0 0 1 7 0"/><circle cx="12" cy="19" r="1"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="8" width="17" height="9" rx="2.5"/><path d="M21.5 11.5v2"/><rect x="4" y="10" width="10" height="5" rx="1" fill="currentColor" stroke="none"/></svg>
+        </div>
+        <div>
+          <div class="time">11:24</div>
+          <div class="date">21.08.2026</div>
+        </div>
+      </div>
+
+    </div>
+
+    <p class="caption">
+      The dock floats clear of the screen edge, so the wallpaper carries underneath and no
+      full strip of a 14-inch display is spent on chrome. A running application is marked
+      by a single 4&nbsp;px dot, not a bar. Clock and system state sit in their own tile
+      rather than in a second panel across the top &mdash; the same information as macOS
+      offers, without surrendering another row of pixels.
+    </p>
+  </section>
+
+  <!-- ============ THE WINE TRICK ============ -->
+  <section>
+    <h2>The part nobody else does</h2>
+    <p class="lede">
+      A Windows program running under Wine keeps Wine's 1995 chrome. It works perfectly and
+      still looks like a visitor. We generate the Wine theme from the Plasma colour scheme,
+      so it follows the desktop &mdash; including when you switch to dark.
+    </p>
+
+    <div class="compare">
+      <div class="pane">
+        <div class="pane-label">Today <span>&mdash; Wine default</span></div>
+        <div class="pane-stage">
+          <div class="w95">
+            <div class="w95-bar"><b>Extract</b><span class="w95-x">&times;</span></div>
+            <div class="w95-body">
+              <div style="height:7px;background:#A0A0A0;width:80%"></div>
+              <div style="height:7px;background:#A0A0A0;width:55%"></div>
+              <div class="w95-btn">Extract</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pane">
+        <div class="pane-label">ivy <span>&mdash; theme inherited</span></div>
+        <div class="pane-stage">
+          <div class="ivywin">
+            <div class="ivywin-bar">Extract
+              <svg width="11" height="11" viewBox="0 0 12 12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="3" x2="9" y2="9"/><line x1="9" y1="3" x2="3" y2="9"/></svg>
+            </div>
+            <div class="ivywin-body">
+              <div class="muted-line" style="width:80%"></div>
+              <div class="muted-line" style="width:55%"></div>
+              <div class="ivywin-btn">Extract</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="caption">
+      Same program, same prefix, same speed. Only the chrome changed &mdash; and with it,
+      whether the application reads as a guest or as part of the system.
+    </p>
+  </section>
+
+  <!-- ============ TOKENS ============ -->
+  <section>
+    <h2>Colour</h2>
+    <p class="lede">
+      One accent, everything else neutral. The greys carry a slight green bias so they
+      belong to the accent rather than sitting next to it. Ivy green instead of Windows
+      blue is the whole of our visual difference &mdash; and it is enough.
+    </p>
+
+    <div class="swatches">
+      <div class="sw"><div class="sw-chip" style="background:#4FAE7F"></div><div class="sw-meta"><b>Accent</b><code>#4FAE7F</code></div></div>
+      <div class="sw"><div class="sw-chip" style="background:#10130F"></div><div class="sw-meta"><b>Ground</b><code>#10130F</code></div></div>
+      <div class="sw"><div class="sw-chip" style="background:#1B211C"></div><div class="sw-meta"><b>Surface</b><code>#1B211C</code></div></div>
+      <div class="sw"><div class="sw-chip" style="background:#262E27"></div><div class="sw-meta"><b>Raised</b><code>#262E27</code></div></div>
+      <div class="sw"><div class="sw-chip" style="background:#97A399"></div><div class="sw-meta"><b>Ink soft</b><code>#97A399</code></div></div>
+      <div class="sw"><div class="sw-chip" style="background:#E9EEE9"></div><div class="sw-meta"><b>Ink</b><code>#E9EEE9</code></div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Type</h2>
+    <p class="lede">
+      Segoe&nbsp;UI is licensed and cannot ship. <strong>Selawik</strong> &mdash; released by
+      Microsoft under an open licence and metric-compatible with Segoe &mdash; gives the
+      same texture legally. Four sizes, no more.
+    </p>
+
+    <div>
+      <div class="scale-row"><span class="label">28 / 600</span><span style="font-family:var(--font-display);font-size:28px;font-weight:600;letter-spacing:-.02em">Window title</span></div>
+      <div class="scale-row"><span class="label">15 / 600</span><span style="font-size:15px;font-weight:600">Section heading</span></div>
+      <div class="scale-row"><span class="label">13 / 400</span><span style="font-size:13px">Interface body &mdash; menus, labels, list rows</span></div>
+      <div class="scale-row"><span class="label">11 / 600</span><span style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)">Caption &amp; status</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Geometry &amp; motion</h2>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>Token</th><th>Value</th><th>Applies to</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>dock</code></td><td>42&nbsp;px tall, floating<br>24&nbsp;px clear of the edge</td><td>Detached, centred, radius 15&nbsp;px. Status tile mirrors it on the right.</td></tr>
+          <tr><td><code>radius-lg</code></td><td>12&nbsp;px</td><td>Start menu, notification panels</td></tr>
+          <tr><td><code>radius-md</code></td><td>8&nbsp;px</td><td>Windows, dialogs, cards</td></tr>
+          <tr><td><code>radius-sm</code></td><td>4&nbsp;px</td><td>Buttons, fields, list rows</td></tr>
+          <tr><td><code>space</code></td><td>4&nbsp;px base</td><td>All padding and gaps are multiples</td></tr>
+          <tr><td><code>blur</code></td><td>20&ndash;28&nbsp;px</td><td><strong>System chrome only</strong> &mdash; panel, menus, notifications</td></tr>
+          <tr><td><code>motion</code></td><td>150&nbsp;ms, ease-out</td><td>Every transition. Nothing slower.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <p><strong>Why blur is restricted.</strong> Mica behind every window looks wonderful and
+      costs several watts on a 15&nbsp;W processor. Battery life is a stated priority for this
+      machine, so blur is spent where it is seen &mdash; the panel and menus you look at
+      constantly &mdash; and withheld from window backgrounds, where it mostly renders
+      wallpaper nobody is reading.</p>
+      <p>Same reasoning for 150&nbsp;ms: fast animation reads as a responsive machine.
+      Slow animation reads as a slow one, whatever the benchmark says.</p>
+      <p><strong>No dock magnification.</strong> macOS's zoom-on-hover is the most imitated
+      and least useful thing about its dock &mdash; it moves the target you are aiming at.
+      Icons stay put; hover changes only the background.</p>
+    </div>
+  </section>
+
+  <!-- ============ SCOPE ============ -->
+  <section>
+    <h2>What this actually costs</h2>
+
+    <div class="cols">
+      <div class="card">
+        <h3>Configuration &mdash; days</h3>
+        <ul>
+          <li>Centred taskbar, panel height and grouping</li>
+          <li>Window radius, shadow, blur rules in KWin</li>
+          <li>Colour scheme and accent</li>
+          <li>Icon theme and cursor set</li>
+          <li>Selawik as the interface font</li>
+          <li>Wallpaper, boot splash, login screen, system name</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Real work &mdash; weeks</h3>
+        <ul>
+          <li>Generating the Wine theme from the live colour scheme</li>
+          <li>Keeping it in sync when the user switches to dark</li>
+          <li>An icon set that covers Windows applications too, so a Wine app in the
+              menu does not break the drawing style</li>
+          <li>Font rendering tuned inside Wine prefixes</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="caption">
+      The left column is what makes it stop looking like Aurora. The right column is
+      what makes it look like one system rather than two.
+    </p>
+  </section>
+
+</div>
